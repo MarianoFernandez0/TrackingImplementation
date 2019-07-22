@@ -41,15 +41,20 @@ def find_blobs(img):
 
 
 
-#=============================================================================
-#Primero trabajo con una imagen
-#=============================================================================
+#==============================================================================
+#Primero trabajo con una imagen - PRIMERA IMPLEMENTACION SIN FILTRO DE KALMAN # 
+#==============================================================================
 img = secuencia[0]
 key_points = find_blobs(img)
-coordinates_list = []
+coordinates_list_actual = []
 for keypoint in key_points:
-	coordinates_list.append(np.array(keypoint.pt))
-print(coordinates_list[0][0])
+	coordinates_list_actual.append(np.array(keypoint.pt))
 
+#Tomo frame nuevo
+img = secuencia[1]
+key_points = find_blobs(img)
+coordinates_list_future = []
+for keypoint in key_points:
+	coordinates_list_future.append(np.array(keypoint.pt))
 
 
