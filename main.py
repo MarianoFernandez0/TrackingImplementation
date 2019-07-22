@@ -2,6 +2,7 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+import sys
 
 #----------PARÁMETROS-------
 frames = 200
@@ -11,26 +12,44 @@ secuencia = []
 for i in range(90000,90000+frames):
 	secuencia.append(cv2.imread( str('./inputs/') + str(i) + str('.png')))
 
+
+
 #=============================================================================
+#   DETECCION
+#=============================================================================
+#Devuelvo lista de blobs detectados.
+#=============================================================================
+def find_blobs(img):
+	img = secuencia[0]
+
+	#Filtro de media para sacar puntos ruidosos
+	img_filtered = cv2.blur(img, (10,10))
+	_ , segmented = cv2.threshold(cv2.cvtColor(img_filtered, cv2.COLOR_BGR2GRAY), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+	#parametros
+	params = cv2.SimpleBlobDetector_Params()
+	#instancia
+	detector = cv2.SimpleBlobDetector_create()
+
+	#Detecto
+	keypoints = detector.detect(255 - segmented)
+
+	#out = cv2.drawKeypoints(img, keypoints, np.array([]), (0,255,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+	return keypoints
+
+
+
+
+
 #=============================================================================
 #Primero trabajo con una imagen
-img = cv2.imread('./inputs/images.png')
+#=============================================================================
 img = secuencia[0]
-_ , img = cv2.threshold(cv2.cvtColor(secuencia[0], cv2.COLOR_BGR2GRAY), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+key_points = find_blobs(img)
+coordinates_list = []
+for keypoint in key_points:
+	coordinates_list.append(np.array(keypoint.pt))
+print(coordinates_list[0][0])
 
 
-#Parametros del detector
-params = cv2.SimpleBlobDetector_Params()
 
-params.minThreshold = 200
-
-#Creo instancia de detector
-detector = cv2.SimpleBlobDetector_create()
-#Detecto blobs
-keypoints = detector.detect(img)
-print(keypoints)
-
-keypoints_draw = cv2.drawKeypoints(img, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-plt.imshow(keypoints_draw)
-plt.show()
