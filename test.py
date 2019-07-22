@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 from scipy.optimize import linear_sum_assignment
+from functions import file_functions
 
 #----------PARÁMETROS-------
 frames = 200
@@ -89,9 +90,9 @@ assignments = get_assignments(coordinates_list_actual,coordinates_list_future)
 #track_list = update_tracks(track_list)
 
 
-for assigment in assignments:
-    if tracks[i,1]>0:
-        cv2.line(detected_blobs_2, (int(coordinates_list_actual[i][0]),int(coordinates_list_actual[i][1])), (int(coordinates_list_future[int(tracks[i,1])][0]),int(coordinates_list_future[int(tracks[i,1])][1])),(0,255,0))
+#Pruebo track
+for assignment in assignments:
+    cv2.line(detected_blobs, (int(coordinates_list_actual[assignment[0]][0]),int(coordinates_list_actual[assignment[0]][1])), (int(coordinates_list_future[int(assignment[1])][0]),int(coordinates_list_future[int(assignment[1])][1])),(0,255,0))
 cv2.imshow('Tracks',detected_blobs_2)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
