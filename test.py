@@ -2,7 +2,7 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-import sys
+from scipy.optimize import linear_sum_assignment
 
 #----------PARÁMETROS-------
 frames = 200
@@ -19,11 +19,11 @@ for i in range(90000,90000+frames):
 #=============================================================================
 #Devuelvo lista de blobs detectados.
 #=============================================================================
-def find_blobs(img,diam):
+def find_blobs(img):
 	#img = secuencia[0]
 
 	#Filtro de media para sacar puntos ruidosos
-	img_filtered = cv2.blur(img, (diam,diam))
+	img_filtered = cv2.blur(img, (10,10))
 	_ , segmented = cv2.threshold(cv2.cvtColor(img_filtered, cv2.COLOR_BGR2GRAY), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
 	#parametros
@@ -38,54 +38,56 @@ def find_blobs(img,diam):
 	return keypoints
 
 
- 
+#==============================================================================
+#Devuelvo  # 
+#==============================================================================
+def track(coordinates_list_actual, coordinates_list_future, minCost = 30):
+    #Calculo la matriz costo según la norma 2
+    cost = np.zeros([len(coordinates_list_actual),len(coordinates_list_future)])
+    for i in range(len(coordinates_list_actual)):
+        for j in range(len(coordinates_list_future)):
+            cost[i,j] = np.linalg.norm(coordinates_list_actual[i]-coordinates_list_future[j],2)
+    #Resulevo asignaciones con matriz de costos
+    row_ind, col_ind = linear_sum_assignment(cost) 
+    #Tengo que discriminar aquellas que sean mayores al costo minimo
+    final_assignation = []
 
+    for i in range(len(row_ind)):
+    	if(cost[row_ind[i],col_ind[i]] < minCost):
+    		final_assignation.append(np.array([row_ind[i], col_ind[i]]))
+
+    return final_assignation
 
 #==============================================================================
 #Primero trabajo con una imagen - PRIMERA IMPLEMENTACION SIN FILTRO DE KALMAN # 
 #==============================================================================
-img = secuencia[0]
-#cv2.imshow('image',img)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
-diam = 14
-key_points = find_blobs(img,diam)
+img = secuencia[1]
+key_points = find_blobs(img)
 
-key_points_draw = key_points
-detected_blobs = cv2.drawKeypoints(img, key_points_draw, np.array([]), (255,0,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-cv2.imshow('Blobs',detected_blobs)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+detected_blobs = cv2.drawKeypoints(img, key_points, np.array([]), (255,0,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
 coordinates_list_actual = []
-#for keypoint in key_points:
-#	coordinates_list_actual.append(np.array(keypoint.pt))
-for i in range(len(key_points)):
-	coordinates_list_actual.append(np.array(key_points[i].pt))
-
-
+for keypoint in key_points:
+	coordinates_list_actual.append(np.array(keypoint.pt))
 
 #Tomo frame nuevo
-img = secuencia[1]
+img = secuencia[6]
+key_points = find_blobs(img)
 
-key_points_1 = find_blobs(img,diam)
+detected_blobs_2 = cv2.drawKeypoints(detected_blobs, key_points, np.array([]), (255,0,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
 coordinates_list_future = []
+for keypoint in key_points:
+	coordinates_list_future.append(np.array(keypoint.pt))
 
-key_points_draw = key_points_1
-detected_blobs = cv2.drawKeypoints(img, key_points_1, np.array([]), (255,0,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-cv2.imshow('Blobs',detected_blobs)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-#for keypoint in key_points:
-#	coordinates_list_future.append(np.array(keypoint.pt))
 
-for i in range(len(key_points)):
-	coordinates_list_future.append(np.array(key_points[i].pt))
-
-Cost = np.zeros([len(coordinates_list_actual),len(coordinates_list_future)])
+#dibujo las trtacks de las primeras dos imagenes
+assignments = track(coordinates_list_actual,coordinates_list_future)    
+print(assignments)
 
 for i in range(len(coordinates_list_actual)):
-    for j in range(len(coordinates_list_future)):
-        Cost[i,j] = np.linalg.norm(coordinates_list_actual[i]-coordinates_list_future[j],2)
-        i 
-print(Cost.shape)
+    if tracks[i,1]>0:
+        cv2.line(detected_blobs_2, (int(coordinates_list_actual[i][0]),int(coordinates_list_actual[i][1])), (int(coordinates_list_future[int(tracks[i,1])][0]),int(coordinates_list_future[int(tracks[i,1])][1])),(0,255,0))
+cv2.imshow('Tracks',detected_blobs_2)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
