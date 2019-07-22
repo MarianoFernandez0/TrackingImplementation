@@ -41,7 +41,7 @@ def find_blobs(img):
 #==============================================================================
 #Devuelvo  # 
 #==============================================================================
-def track(coordinates_list_actual, coordinates_list_future, minCost = 30):
+def get_assignments(coordinates_list_actual, coordinates_list_future, maxCost = 50):
     #Calculo la matriz costo según la norma 2
     cost = np.zeros([len(coordinates_list_actual),len(coordinates_list_future)])
     for i in range(len(coordinates_list_actual)):
@@ -53,8 +53,8 @@ def track(coordinates_list_actual, coordinates_list_future, minCost = 30):
     final_assignation = []
 
     for i in range(len(row_ind)):
-    	if(cost[row_ind[i],col_ind[i]] < minCost):
-    		final_assignation.append(np.array([row_ind[i], col_ind[i]]))
+    	if(cost[row_ind[i],col_ind[i]] < maxCost):
+    		final_assignation.append([row_ind[i], col_ind[i]])
 
     return final_assignation
 
@@ -82,10 +82,9 @@ for keypoint in key_points:
 
 
 #dibujo las trtacks de las primeras dos imagenes
-assignments = track(coordinates_list_actual,coordinates_list_future)    
-print(assignments)
+assignments = get_assignments(coordinates_list_actual,coordinates_list_future)    
 
-for i in range(len(coordinates_list_actual)):
+for assigment in assignments:
     if tracks[i,1]>0:
         cv2.line(detected_blobs_2, (int(coordinates_list_actual[i][0]),int(coordinates_list_actual[i][1])), (int(coordinates_list_future[int(tracks[i,1])][0]),int(coordinates_list_future[int(tracks[i,1])][1])),(0,255,0))
 cv2.imshow('Tracks',detected_blobs_2)
