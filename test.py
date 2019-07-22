@@ -19,23 +19,6 @@ for i in range(90000,90000+frames):
 #=============================================================================
 #Devuelvo lista de blobs detectados.
 #=============================================================================
-def find_blobs(img):
-	#img = secuencia[0]
-
-	#Filtro de media para sacar puntos ruidosos
-	img_filtered = cv2.blur(img, (10,10))
-	_ , segmented = cv2.threshold(cv2.cvtColor(img_filtered, cv2.COLOR_BGR2GRAY), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-	#parametros
-	params = cv2.SimpleBlobDetector_Params()
-	#instancia
-	detector = cv2.SimpleBlobDetector_create()
-
-	#Detecto
-	keypoints = detector.detect(255 - segmented)
-
-	#out = cv2.drawKeypoints(img, keypoints, np.array([]), (0,255,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-	return keypoints
 
 
 #==============================================================================
