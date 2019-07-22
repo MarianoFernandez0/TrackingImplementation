@@ -37,7 +37,7 @@ def find_blobs(img):
 
 
 #==============================================================================
-#                                 Devuelvo                                    # 
+#Devuelvo  # 
 #==============================================================================
 def get_assignments(coordinates_list_actual, coordinates_list_future, maxCost = 50):
     #Calculo la matriz costo según la norma 2
