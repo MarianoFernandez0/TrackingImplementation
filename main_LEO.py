@@ -13,10 +13,13 @@ secuencia = []
 #==============================================================================
 #------------                   LOAD                           ----------------
 #==============================================================================
+
 for i in range(90000,90000+frames):
-    secuencia.append(cv2.imread( str('./inputs/') + str(i) + str('.png')))
+    secuencia.append(cv2.imread( str('./inputs/microscopio/') + str(i) + str('.png')))
 
-
+'''
+for i in range(frames):
+    secuencia.append(cv2.imread( str('./inputs/simulated') + str(i) + str('.png')))'''
 #==============================================================================
 #------------                  ITERACIONES                   ----------------
 #==============================================================================
@@ -38,6 +41,7 @@ tracks = []
 for i in range(len(coordinates_list_past)):     # Agrego una track por cada coordenada inicial    
     tracks.append(np.ones([frames,2])*-1)   # Cada track es un numpy array con filas como frames y columnas x e y 
     tracks[i][0,:] = coordinates_list_past[i]   # Las coordenadas en el resto de los frame son -1 -1
+    
 
 #ITERO
 for it in range(1, frames):
@@ -55,14 +59,17 @@ for it in range(1, frames):
 
     #Obtengo lista de asignaciones
     assignments = file_functions.get_assignments(coordinates_list_past,coordinates_list_actual)    
-    
     #Guardo en la lista de tracksack
-    #track_list = update_tracks(tr_list)
-    
+    tracks = file_functions.update_tracks(tracks, coordinates_list_past, coordinates_list_actual, assignments, it)
+    coordinates_list_past = coordinates_list_actual.copy()
 #==============================================================================
 #------------                PROCESO INFO OBTENIDA             ----------------
 #==============================================================================  
-    
-    
-    
 
+for it in range(frames):
+    for i in range(it):
+        for track in tracks:
+            if track[i,0]>0 and track[i-1,0]>0:
+                cv2.line(secuencia[it], (int(track[i-1,0]),int(track[i-1,1]) ), (int(track[i,0]),int(track[i,1]) ), (255,255,255))
+    cv2.imwrite(str('./outs/tracking/frame') + str(it) + str('.png'), secuencia[it])
+    
